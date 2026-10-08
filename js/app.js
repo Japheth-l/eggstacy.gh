@@ -6,13 +6,20 @@
   const cedi = (n) => `GH₵ ${n.toLocaleString()}`;
   const intl = (phone) => "233" + phone.replace(/\D/g, "").replace(/^0/, "");
   const prettyPhone = (p) => p.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
+  const sizesOf = (m) => (m.sizes ? Object.keys(m.sizes) : [""]);
+  const unit = (m, size) => (m.sizes ? m.sizes[size] : m.price);
+  const keyOf = (id, size) => `${id}|${size || ""}`;
+  const parseKey = (k) => { const [id, size] = k.split("|"); return { m: byId[id], size }; };
+  const fromPrice = (m) => (m.sizes ? Math.min(...Object.values(m.sizes)) : m.price);
 
   const store = {
     get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
   };
 
-  let cart = store.get("eggstacy-cart", {});
+  let cart = store.get("eggstacy-cart-v2", {});
+  for (const k of Object.keys(cart)) if (!parseKey(k).m) delete cart[k];
+  const sel = {}; // selected size per item
   let activeCat = "all";
   let query = "";
 
@@ -32,6 +39,31 @@
     burger.setAttribute("aria-expanded", false);
   }));
 
+  /* ---------- OPEN NOW (Accra = GMT) ---------- */
+  const ruleFor = (day) => D.hours.find((r) => (r.from <= r.to ? day >= r.from && day <= r.to : day >= r.from || day <= r.to));
+  const fmt = (h) => { h = h % 24; const ap = h >= 12 ? "PM" : "AM"; return `${h % 12 || 12}${ap}`; };
+  function openStatus(now = new Date()) {
+    const day = now.getUTCDay();
+    const h = now.getUTCHours() + now.getUTCMinutes() / 60;
+    const today = ruleFor(day);
+    const yesterday = ruleFor((day + 6) % 7);
+    if (yesterday && yesterday.close > 24 && h < yesterday.close - 24) return { open: true, text: `Open now · until ${fmt(yesterday.close)}` };
+    if (today && h >= today.open && h < today.close) return { open: true, text: `Open now · until ${fmt(today.close)}` };
+    if (today && h < today.open) return { open: false, text: `Closed · opens ${fmt(today.open)}` };
+    const tmr = ruleFor((day + 1) % 7);
+    return { open: false, text: `Closed · opens ${fmt(tmr.open)} tomorrow` };
+  }
+  function renderStatus() {
+    const s = openStatus();
+    $$("[data-status]").forEach((el) => {
+      el.textContent = s.text;
+      el.classList.toggle("is-open", s.open);
+    });
+  }
+  renderStatus();
+  setInterval(renderStatus, 60000);
+  $("#hoursList").innerHTML = D.hours.map((r) => `<li><span>${r.days}</span><strong>${r.label}</strong></li>`).join("");
+
   /* ---------- MENU ---------- */
   const tabs = $("#tabs");
   const grid = $("#menuGrid");
@@ -42,52 +74,84 @@
   tabs.addEventListener("click", (e) => {
     const b = e.target.closest(".tab");
     if (!b) return;
-    activeCat = b.dataset.cat;
-    $$(".tab", tabs).forEach((t) => t.classList.toggle("active", t === b));
-    renderMenu();
+    setCat(b.dataset.cat);
   });
+  function setCat(cat) {
+    activeCat = cat;
+    $$(".tab", tabs).forEach((t) => t.classList.toggle("active", t.dataset.cat === cat));
+    renderMenu();
+  }
   $("#search").addEventListener("input", (e) => {
     query = e.target.value.trim().toLowerCase();
-    renderMenu();
+    if (query && activeCat !== "all") setCat("all");
+    else renderMenu();
   });
 
-  const media = (m, cls) =>
-    m.img
-      ? `<img src="${m.img}" alt="${m.name}" loading="lazy" class="${cls || ""}" />`
-      : `<span class="${cls ? cls : "item__emoji"}">${m.emoji || "🍳"}</span>`;
+  const media = (m) =>
+    m.img ? `<img src="${m.img}" alt="${m.name}" loading="lazy" />` : `<span class="item__emoji">${m.emoji || "🍳"}</span>`;
 
-  const controls = (m) => {
-    const q = cart[m.id] || 0;
+  const controls = (key) => {
+    const q = cart[key] || 0;
     return q
-      ? `<div class="qty"><button data-dec="${m.id}" aria-label="Remove one">−</button><span>${q}</span><button data-inc="${m.id}" aria-label="Add one">+</button></div>`
-      : `<button class="add" data-inc="${m.id}" aria-label="Add ${m.name}">+</button>`;
+      ? `<div class="qty"><button data-dec="${key}" aria-label="Remove one">−</button><span>${q}</span><button data-inc="${key}" aria-label="Add one">+</button></div>`
+      : `<button class="add" data-inc="${key}" aria-label="Add to order">+</button>`;
   };
+
+  const sizeOf = (m) => sel[m.id] ?? sizesOf(m)[0];
+
+  function itemFoot(m) {
+    const size = sizeOf(m);
+    const chips = m.sizes
+      ? `<div class="sizes" role="radiogroup" aria-label="Size">${sizesOf(m)
+          .map((s) => `<button class="size${s === size ? " active" : ""}" role="radio" aria-checked="${s === size}" data-size="${m.id}" data-val="${s}">${s} <b>${m.sizes[s]}</b></button>`)
+          .join("")}</div>`
+      : "";
+    return `${chips}<div class="item__foot">
+        <span class="price">${cedi(unit(m, size))}</span>
+        ${controls(keyOf(m.id, size))}
+      </div>`;
+  }
 
   function renderMenu() {
     const items = D.menu.filter(
       (m) =>
         (activeCat === "all" || m.cat === activeCat) &&
-        (!query || (m.name + " " + m.desc).toLowerCase().includes(query))
+        (!query || (m.name + " " + m.desc + " " + m.cat).toLowerCase().includes(query))
     );
     grid.innerHTML = items.length
       ? items
           .map(
             (m, i) => `
-        <article class="item" style="animation-delay:${i * 40}ms">
+        <article class="item" style="animation-delay:${Math.min(i, 12) * 35}ms">
           <div class="item__img">${media(m)}${m.tag ? `<span class="item__tag">${m.tag}</span>` : ""}</div>
           <div class="item__body">
             <h3>${m.name}</h3>
             <p>${m.desc}</p>
-            <div class="item__foot">
-              ${m.price != null ? `<span class="price">${cedi(m.price)}</span>` : `<span class="price price--ask">Ask in store</span>`}
-              <span data-ctl="${m.id}">${controls(m)}</span>
-            </div>
+            <div data-foot="${m.id}">${itemFoot(m)}</div>
           </div>
         </article>`
           )
           .join("")
-      : `<div class="empty">No matches for "${query}". Try "fries" or "cake" 🍳</div>`;
+      : `<div class="empty">No matches for "${query}". Try "jollof", "fries" or "shake" 🍳</div>`;
   }
+
+  const refreshItem = (id) => $$(`[data-foot="${id}"]`).forEach((el) => (el.innerHTML = itemFoot(byId[id])));
+
+  /* ---------- COMBOS (promo) ---------- */
+  const combos = D.menu.filter((m) => m.cat === "combos");
+  $("#comboGrid").innerHTML = combos
+    .map(
+      (m) => `<article class="combo">
+        <img src="${m.img}" alt="${m.name}" loading="lazy" />
+        <h3>${m.name.replace(" + ", "<br/>+ ")}</h3>
+        <div class="combo__btns">
+          ${sizesOf(m)
+            .map((s) => `<button class="combo__btn" data-add="${keyOf(m.id, s)}"><span>${s}</span><strong>${cedi(m.sizes[s])}</strong></button>`)
+            .join("")}
+        </div>
+      </article>`
+    )
+    .join("");
 
   /* ---------- CART ---------- */
   const drawer = $("#drawer");
@@ -95,10 +159,9 @@
   const branchSelect = $("#branchSelect");
   const fab = $("#fab");
 
-  branchSelect.innerHTML = D.branches
-    .map((b) => `<option value="${b.id}">${b.name} (${b.area})</option>`)
-    .join("");
-  branchSelect.value = store.get("eggstacy-branch", D.branches[0].id);
+  branchSelect.innerHTML = D.branches.map((b) => `<option value="${b.id}">${b.name} (${b.area})</option>`).join("");
+  const savedBranch = store.get("eggstacy-branch", D.branches[0].id);
+  branchSelect.value = D.branches.some((b) => b.id === savedBranch) ? savedBranch : D.branches[0].id;
   branchSelect.addEventListener("change", () => {
     store.set("eggstacy-branch", branchSelect.value);
     renderCart();
@@ -106,15 +169,17 @@
   $("#custName").value = store.get("eggstacy-name", "");
   $("#custName").addEventListener("input", (e) => store.set("eggstacy-name", e.target.value));
 
-  function change(id, delta) {
-    const q = Math.max(0, (cart[id] || 0) + delta);
-    if (q) cart[id] = q;
-    else delete cart[id];
-    store.set("eggstacy-cart", cart);
-    $$(`[data-ctl="${id}"]`).forEach((el) => (el.innerHTML = controls(byId[id])));
+  function change(key, delta) {
+    const { m, size } = parseKey(key);
+    if (!m) return;
+    const q = Math.max(0, (cart[key] || 0) + delta);
+    if (q) cart[key] = q;
+    else delete cart[key];
+    store.set("eggstacy-cart-v2", cart);
+    refreshItem(m.id);
     renderCart();
     if (delta > 0) {
-      toast(`${byId[id].name} added 🍳`);
+      toast(`${m.name}${size ? ` (${size})` : ""} added 🍳`);
       const cb = $("#cartOpen");
       cb.classList.remove("bump");
       void cb.offsetWidth;
@@ -126,44 +191,45 @@
     const inc = e.target.closest("[data-inc]");
     const dec = e.target.closest("[data-dec]");
     const add = e.target.closest("[data-add]");
+    const sz = e.target.closest("[data-size]");
     if (inc) change(inc.dataset.inc, 1);
     if (dec) change(dec.dataset.dec, -1);
     if (add) { change(add.dataset.add, 1); openCart(); }
+    if (sz) { sel[sz.dataset.size] = sz.dataset.val; refreshItem(sz.dataset.size); }
   });
 
   function totals() {
-    let sum = 0, count = 0, unpriced = 0;
-    for (const [id, q] of Object.entries(cart)) {
-      const m = byId[id];
+    let sum = 0, count = 0;
+    for (const [k, q] of Object.entries(cart)) {
+      const { m, size } = parseKey(k);
       if (!m) continue;
       count += q;
-      if (m.price != null) sum += m.price * q;
-      else unpriced += q;
+      sum += (unit(m, size) || 0) * q;
     }
-    return { sum, count, unpriced };
+    return { sum, count };
   }
 
   const branch = () => D.branches.find((b) => b.id === branchSelect.value) || D.branches[0];
+  const label = (m, size) => `${m.name}${size ? ` (${size})` : ""}`;
 
   function renderCart() {
-    const { sum, count, unpriced } = totals();
+    const { sum, count } = totals();
     $("#cartCount").textContent = count;
-    $("#fabText").textContent = count ? `${count} item${count > 1 ? "s" : ""} · View order` : "Your order";
+    $("#fabText").textContent = count ? `${count} item${count > 1 ? "s" : ""} · ${cedi(sum)}` : "Your order";
     fab.classList.toggle("show", count > 0);
     $("#cartTotal").textContent = cedi(sum);
-    $("#totalNote").textContent = unpriced ? `+ ${unpriced} item${unpriced > 1 ? "s" : ""} priced at the branch.` : "";
     $("#callBranch").href = `tel:${branch().phone}`;
     $("#callBranch").textContent = `📞 Call ${branch().name} (${prettyPhone(branch().phone)})`;
 
-    const lines = Object.entries(cart).filter(([id]) => byId[id]);
+    const lines = Object.entries(cart).filter(([k]) => parseKey(k).m);
     $("#cartItems").innerHTML = lines.length
       ? lines
-          .map(([id, q]) => {
-            const m = byId[id];
+          .map(([k, q]) => {
+            const { m, size } = parseKey(k);
             return `<div class="line">
               ${m.img ? `<img class="line__thumb" src="${m.img}" alt="" />` : `<span class="line__thumb">${m.emoji || "🍳"}</span>`}
-              <div><strong>${m.name}</strong><small>${m.price != null ? cedi(m.price * q) : "Ask in store"}</small></div>
-              <div class="qty"><button data-dec="${id}" aria-label="Remove one">−</button><span>${q}</span><button data-inc="${id}" aria-label="Add one">+</button></div>
+              <div><strong>${label(m, size)}</strong><small>${cedi(unit(m, size) * q)}</small></div>
+              <div class="qty"><button data-dec="${k}" aria-label="Remove one">−</button><span>${q}</span><button data-inc="${k}" aria-label="Add one">+</button></div>
             </div>`;
           })
           .join("")
@@ -189,37 +255,39 @@
   addEventListener("keydown", (e) => { if (e.key === "Escape") { closeCart(); closeModal(); } });
 
   $("#sendWhatsApp").addEventListener("click", () => {
-    const { sum, unpriced } = totals();
+    const { sum } = totals();
     const b = branch();
     const name = $("#custName").value.trim();
     const note = $("#custNote").value.trim();
     const lines = Object.entries(cart)
-      .filter(([id]) => byId[id])
-      .map(([id, q]) => `• ${q} × ${byId[id].name}${byId[id].price != null ? ` (${cedi(byId[id].price * q)})` : ""}`);
+      .filter(([k]) => parseKey(k).m)
+      .map(([k, q]) => { const { m, size } = parseKey(k); return `• ${q} × ${label(m, size)}: ${cedi(unit(m, size) * q)}`; });
     const msg = [
       `Hello Eggstacy ${b.name}! 🍳${name ? ` This is ${name}.` : ""}`,
       `I'd like to order:`,
       ...lines,
       "",
-      `Total: ${cedi(sum)}${unpriced ? " + items priced in store" : ""}`,
+      `Total: ${cedi(sum)}`,
       ...(note ? [`Note: ${note}`] : []),
     ].join("\n");
     window.open(`https://wa.me/${intl(b.phone)}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
   });
 
   /* ---------- RANDOM PICK ---------- */
+  const pickable = D.menu.filter((m) => !["extras"].includes(m.cat) && m.id !== "water");
   $("#eggBtn").addEventListener("click", (e) => {
     const btn = e.currentTarget;
     btn.classList.remove("shake");
     void btn.offsetWidth;
     btn.classList.add("shake");
-    const m = D.menu[Math.floor(Math.random() * D.menu.length)];
+    const m = pickable[Math.floor(Math.random() * pickable.length)];
+    const size = sizesOf(m)[0];
     setTimeout(() => {
       $(".egg__shell", btn).textContent = "🍳";
       $("#eggResult").innerHTML = `<div class="pick">
         ${m.img ? `<img src="${m.img}" alt="" />` : `<span class="pick__emoji">${m.emoji}</span>`}
-        <div><strong>${m.name}</strong><span class="muted small">${m.desc}</span></div>
-        <button class="add" data-inc="${m.id}" aria-label="Add ${m.name}">+</button>
+        <div><strong>${m.name}</strong><span class="muted small">${m.sizes ? "from " : ""}${cedi(fromPrice(m))}</span></div>
+        <button class="add" data-inc="${keyOf(m.id, size)}" aria-label="Add ${m.name}">+</button>
       </div>`;
       burst(e.clientX, e.clientY);
       setTimeout(() => ($(".egg__shell", btn).textContent = "🥚"), 1500);

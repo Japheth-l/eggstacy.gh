@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Eggstacy | Egg Burgers, Loaded Fries & Fast Food in Accra</title>
-  <meta name="description" content="Ghana's go-to for tasty egg-based fast food. Loaded fries, wok noodles, egg burgers, slushies and ice cream cakes. Osu, East Legon and East Legon Hills." />
+  <meta name="description" content="Ghana's go-to for tasty egg-based fast food. Loaded fries, egg burgers, jollof, Thai chilli noodles, slushies and milkshakes. Osu, East Legon and East Legon Hills." />
   <meta name="theme-color" content="#0d0d0d" />
   <meta property="og:title" content="Eggstacy | Fresh, fast & satisfying" />
   <meta property="og:description" content="Loaded fries, hot noodles, cold slushies. Order from Osu, East Legon or East Legon Hills." />
@@ -41,9 +41,10 @@
       <video class="hero__video" src="assets/video/hero.mp4" autoplay muted loop playsinline poster="assets/img/noodles.jpg"></video>
       <div class="hero__shade"></div>
       <div class="hero__content">
+        <p class="status-pill" data-status>Checking hours…</p>
         <p class="eyebrow">🍳 Fresh · Fast · Satisfying 🔥</p>
         <h1>Ghana's go-to for <span class="brush">egg-based</span> fast food</h1>
-        <p class="hero__sub">Loaded fries, hot noodles, cold slushies and egg burgers, made fresh at our three Accra branches.</p>
+        <p class="hero__sub">Loaded fries, egg burgers, jollof, Thai chilli noodles, slushie towers and milkshakes, made fresh at our three Accra branches.</p>
         <div class="hero__cta">
           <a href="#menu" class="btn btn--yellow">See the menu</a>
           <a href="tel:0594681767" class="btn btn--ghost">📞 Call to order</a>
@@ -59,25 +60,20 @@
     <!-- TICKER -->
     <div class="ticker" aria-hidden="true">
       <div class="ticker__track">
-        <span>YOUR FRIES ARE LOADED 🍟</span><span>HOT NOODLES 🍜</span><span>COLD SLUSHIE 🧊</span><span>IT'S NOT JUST CAKE, IT'S ICE CREAM CAKE 🍰</span><span>EGG BURGERS 🍳</span>
-        <span>YOUR FRIES ARE LOADED 🍟</span><span>HOT NOODLES 🍜</span><span>COLD SLUSHIE 🧊</span><span>IT'S NOT JUST CAKE, IT'S ICE CREAM CAKE 🍰</span><span>EGG BURGERS 🍳</span>
+        <span>YOUR FRIES ARE LOADED 🍟</span><span>HOT NOODLES 🍜</span><span>COLD SLUSHIE 🧊</span><span>LAS VEGAS TOWER 🥤</span><span>ASSORTED JOLLOF 🍗</span><span>EGG BURGERS 🍳</span>
+        <span>YOUR FRIES ARE LOADED 🍟</span><span>HOT NOODLES 🍜</span><span>COLD SLUSHIE 🧊</span><span>LAS VEGAS TOWER 🥤</span><span>ASSORTED JOLLOF 🍗</span><span>EGG BURGERS 🍳</span>
       </div>
     </div>
 
     <!-- PROMO -->
     <section class="promo section" id="promo">
       <div class="promo__card reveal">
-        <div class="promo__text">
-          <p class="eyebrow eyebrow--dark">This month only</p>
-          <h2>Unlimited refills on your slushy combo</h2>
-          <p>Buy any combo deal and keep the slushy flowing. Chicken Noodles + Slushy for just</p>
-          <div class="promo__price"><small>GH₵</small>150</div>
-          <button class="btn btn--dark" data-add="noodle-slushy-combo">Add combo to order +</button>
+        <div class="promo__head">
+          <p class="eyebrow eyebrow--dark">Refill your</p>
+          <h2>Slushy Combo</h2>
+          <p>Pick a meal and get a slushy with <strong>unlimited refills</strong>. GH₵150 with a slushy cup, or GH₵180 with a Las Vegas Tower.</p>
         </div>
-        <div class="promo__img">
-          <img src="assets/img/noodle-combo-close.jpg" alt="Chicken noodles with an Eggstacy slushy cup" loading="lazy" />
-          <span class="sticker">ORDER<br>NOW!</span>
-        </div>
+        <div class="combos" id="comboGrid"></div>
       </div>
     </section>
 
@@ -92,11 +88,11 @@
         <div class="tabs" id="tabs" role="tablist"></div>
         <label class="search">
           <span>🔎</span>
-          <input type="search" id="search" placeholder="Search fries, noodles, cake…" />
+          <input type="search" id="search" placeholder="Search jollof, fries, shakes…" />
         </label>
       </div>
       <div class="menu__grid" id="menuGrid"></div>
-      <p class="muted small center">Items marked "Ask in store" are priced at the branch. Prices may change.</p>
+      <p class="muted small center">Prices in Ghana cedis. Prices may change.</p>
     </section>
 
     <!-- CRAVING PICKER -->
@@ -159,6 +155,13 @@
         <p class="eyebrow">Pull up</p>
         <h2>Three branches across Accra</h2>
       </div>
+      <div class="hours reveal">
+        <div>
+          <p class="eyebrow">Open hours · all branches</p>
+          <ul id="hoursList"></ul>
+        </div>
+        <p class="status-pill status-pill--lg" data-status>Checking hours…</p>
+      </div>
       <div class="branches" id="branches"></div>
     </section>
 
@@ -175,15 +178,15 @@
         </details>
         <details>
           <summary>How does the unlimited slushy refill work?</summary>
-          <p>Buy any of our combo deals this month and get unlimited refills on your slushy while you dine in.</p>
+          <p>Order any Slushy Combo (Assorted Jollof, Chicken Noodles, Chicken Loaded Fries or Beef Burger) and get unlimited refills on your slushy. GH₵150 with a slushy cup, or GH₵180 with a Las Vegas Tower.</p>
         </details>
         <details>
           <summary>Do you deliver?</summary>
           <p>Call or WhatsApp your nearest branch and we'll sort you out with pickup or delivery options.</p>
         </details>
         <details>
-          <summary>Do you do ice cream cakes for birthdays?</summary>
-          <p>Yes! Choco Vanilla, Oreo, Cheesecake and Red Velvet ice cream cakes. Message a branch to reserve one.</p>
+          <summary>What are your opening hours?</summary>
+          <p>Monday to Thursday, 10AM to 11PM. Friday to Sunday, 10AM to 1AM. Same hours at all three branches.</p>
         </details>
       </div>
     </section>
@@ -192,6 +195,7 @@
   <footer class="footer">
     <img src="assets/img/logo.png" alt="" width="72" height="72" />
     <p class="brush big">Fresh, fast & satisfying!</p>
+    <p class="muted">Mon–Thu 10AM–11PM · Fri–Sun 10AM–1AM</p>
     <p class="muted">Osu Shell · East Legon (Lagos Ave) · East Legon Hills</p>
     <p><a href="https://www.instagram.com/eggstacy.gh/" target="_blank" rel="noopener">Instagram @eggstacy.gh</a> · <a href="tel:0594681767">059 468 1767</a></p>
     <p class="muted small">© <span id="year"></span> Eggstacy Ghana</p>
@@ -219,8 +223,7 @@
         <input id="custNote" placeholder="Extra cheese, no onions…" />
       </label>
       <div class="total"><span>Total</span><strong id="cartTotal">GH₵ 0</strong></div>
-      <p class="muted small" id="totalNote"></p>
-      <button class="btn btn--yellow btn--block" id="sendWhatsApp">Send order on WhatsApp</button>
+            <button class="btn btn--yellow btn--block" id="sendWhatsApp">Send order on WhatsApp</button>
       <a class="btn btn--ghost btn--block" id="callBranch" href="#">📞 Call branch instead</a>
     </div>
   </aside>
