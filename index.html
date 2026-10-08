@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eggstacy | Egg Burgers, Loaded Fries & Fast Food in Accra</title>
+  <meta name="description" content="Ghana's go-to for tasty egg-based fast food. Loaded fries, wok noodles, egg burgers, slushies and ice cream cakes. Osu, East Legon and East Legon Hills." />
+  <meta name="theme-color" content="#0d0d0d" />
+  <meta property="og:title" content="Eggstacy | Fresh, fast & satisfying" />
+  <meta property="og:description" content="Loaded fries, hot noodles, cold slushies. Order from Osu, East Legon or East Legon Hills." />
+  <meta property="og:image" content="assets/img/fries-chicken.jpg" />
+  <link rel="icon" href="assets/img/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- NAV -->
+  <header class="nav" id="nav">
+    <a href="#top" class="nav__brand" id="logoEgg" aria-label="Eggstacy home">
+      <img src="assets/img/logo.png" alt="Eggstacy logo" width="44" height="44" />
+      <span>Eggstacy</span>
+    </a>
+    <nav class="nav__links" id="navLinks">
+      <a href="#menu">Menu</a>
+      <a href="#promo">Promo</a>
+      <a href="#reels">Reels</a>
+      <a href="#locations">Find us</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <button class="cart-btn" id="cartOpen" aria-label="Open order">
+      🛒 <span class="cart-btn__count" id="cartCount">0</span>
+    </button>
+    <button class="burger" id="burger" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <video class="hero__video" src="assets/video/hero.mp4" autoplay muted loop playsinline poster="assets/img/noodles.jpg"></video>
+      <div class="hero__shade"></div>
+      <div class="hero__content">
+        <p class="eyebrow">🍳 Fresh · Fast · Satisfying 🔥</p>
+        <h1>Ghana's go-to for <span class="brush">egg-based</span> fast food</h1>
+        <p class="hero__sub">Loaded fries, hot noodles, cold slushies and egg burgers, made fresh at our three Accra branches.</p>
+        <div class="hero__cta">
+          <a href="#menu" class="btn btn--yellow">See the menu</a>
+          <a href="tel:0594681767" class="btn btn--ghost">📞 Call to order</a>
+        </div>
+        <ul class="hero__stats">
+          <li><strong data-count="3">0</strong><span>Branches</span></li>
+          <li><strong data-count="4962">0</strong><span>Instagram fam</span></li>
+          <li><strong>∞</strong><span>Slushy refills</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- TICKER -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__track">
+        <span>YOUR FRIES ARE LOADED 🍟</span><span>HOT NOODLES 🍜</span><span>COLD SLUSHIE 🧊</span><span>IT'S NOT JUST CAKE, IT'S ICE CREAM CAKE 🍰</span><span>EGG BURGERS 🍳</span>
+        <span>YOUR FRIES ARE LOADED 🍟</span><span>HOT NOODLES 🍜</span><span>COLD SLUSHIE 🧊</span><span>IT'S NOT JUST CAKE, IT'S ICE CREAM CAKE 🍰</span><span>EGG BURGERS 🍳</span>
+      </div>
+    </div>
+
+    <!-- PROMO -->
+    <section class="promo section" id="promo">
+      <div class="promo__card reveal">
+        <div class="promo__text">
+          <p class="eyebrow eyebrow--dark">This month only</p>
+          <h2>Unlimited refills on your slushy combo</h2>
+          <p>Buy any combo deal and keep the slushy flowing. Chicken Noodles + Slushy for just</p>
+          <div class="promo__price"><small>GH₵</small>150</div>
+          <button class="btn btn--dark" data-add="noodle-slushy-combo">Add combo to order +</button>
+        </div>
+        <div class="promo__img">
+          <img src="assets/img/noodle-combo-close.jpg" alt="Chicken noodles with an Eggstacy slushy cup" loading="lazy" />
+          <span class="sticker">ORDER<br>NOW!</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MENU -->
+    <section class="section" id="menu">
+      <div class="section__head reveal">
+        <p class="eyebrow">What's cooking</p>
+        <h2>The Menu</h2>
+        <p class="muted">Tap a category, add what you're craving, then send your order straight to your nearest branch.</p>
+      </div>
+      <div class="menu__controls reveal">
+        <div class="tabs" id="tabs" role="tablist"></div>
+        <label class="search">
+          <span>🔎</span>
+          <input type="search" id="search" placeholder="Search fries, noodles, cake…" />
+        </label>
+      </div>
+      <div class="menu__grid" id="menuGrid"></div>
+      <p class="muted small center">Items marked "Ask in store" are priced at the branch. Prices may change.</p>
+    </section>
+
+    <!-- CRAVING PICKER -->
+    <section class="section craving reveal">
+      <div class="craving__box">
+        <h2>Can't decide? 🥚</h2>
+        <p class="muted">Crack the egg and let Eggstacy pick for you.</p>
+        <button class="egg" id="eggBtn" aria-label="Crack the egg for a random pick">
+          <span class="egg__shell">🥚</span>
+        </button>
+        <div class="craving__result" id="eggResult" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- REELS -->
+    <section class="section" id="reels">
+      <div class="section__head reveal">
+        <p class="eyebrow">Straight from the gram</p>
+        <h2>Watch it sizzle</h2>
+        <p class="muted">Tap a reel to watch with sound.</p>
+      </div>
+      <div class="reels">
+        <figure class="reel reveal" data-src="assets/video/fries.mp4">
+          <video src="assets/video/fries.mp4" muted loop playsinline preload="metadata" poster="assets/img/fries-sauced.jpg"></video>
+          <figcaption><strong>Loaded Fries</strong><span>Chicken, cheese, sauce. Repeat.</span></figcaption>
+          <span class="reel__play">▶</span>
+        </figure>
+        <figure class="reel reveal" data-src="assets/video/tour.mp4">
+          <video src="assets/video/tour.mp4" muted loop playsinline preload="metadata" poster="assets/img/storefront.jpg"></video>
+          <figcaption><strong>Meet Ali</strong><span>Our manager gives you the tour</span></figcaption>
+          <span class="reel__play">▶</span>
+        </figure>
+        <figure class="reel reveal" data-src="assets/video/noodles.mp4">
+          <video src="assets/video/noodles.mp4" muted loop playsinline preload="metadata" poster="assets/img/noodles.jpg"></video>
+          <figcaption><strong>Wok Noodles</strong><span>Hot noodles, cold slushie</span></figcaption>
+          <span class="reel__play">▶</span>
+        </figure>
+      </div>
+      <div class="center"><a class="btn btn--ghost" href="https://www.instagram.com/eggstacy.gh/" target="_blank" rel="noopener">Follow @eggstacy.gh</a></div>
+    </section>
+
+    <!-- VIBE / GALLERY -->
+    <section class="section vibe">
+      <div class="vibe__text reveal">
+        <p class="eyebrow">The vibe</p>
+        <h2>Bright yellow walls. Loud flavours. Good energy.</h2>
+        <blockquote>"Our social media manager says if we dance and talk, we go go viral. We can't wait to have you!"<cite>Ali, Manager</cite></blockquote>
+      </div>
+      <div class="gallery reveal">
+        <img src="assets/img/storefront.jpg" alt="Eggstacy Fast Food storefront at East Legon Hills" loading="lazy" />
+        <img src="assets/img/interior-mural.jpg" alt="Colourful mural and yellow benches inside Eggstacy" loading="lazy" />
+        <img src="assets/img/neon-wall.jpg" alt="Neon Eggstacy sign on a yellow wall" loading="lazy" />
+        <img src="assets/img/slushie-machines.jpg" alt="Slushie machines at the counter" loading="lazy" />
+      </div>
+    </section>
+
+    <!-- LOCATIONS -->
+    <section class="section" id="locations">
+      <div class="section__head reveal">
+        <p class="eyebrow">Pull up</p>
+        <h2>Three branches across Accra</h2>
+      </div>
+      <div class="branches" id="branches"></div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+      <div class="section__head reveal">
+        <p class="eyebrow">Good to know</p>
+        <h2>FAQ</h2>
+      </div>
+      <div class="faq reveal">
+        <details>
+          <summary>How do I order?</summary>
+          <p>Add items to your order on this page, pick your branch and send it on WhatsApp, or just call the branch. You can also DM us on Instagram @eggstacy.gh.</p>
+        </details>
+        <details>
+          <summary>How does the unlimited slushy refill work?</summary>
+          <p>Buy any of our combo deals this month and get unlimited refills on your slushy while you dine in.</p>
+        </details>
+        <details>
+          <summary>Do you deliver?</summary>
+          <p>Call or WhatsApp your nearest branch and we'll sort you out with pickup or delivery options.</p>
+        </details>
+        <details>
+          <summary>Do you do ice cream cakes for birthdays?</summary>
+          <p>Yes! Choco Vanilla, Oreo, Cheesecake and Red Velvet ice cream cakes. Message a branch to reserve one.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <img src="assets/img/logo.png" alt="" width="72" height="72" />
+    <p class="brush big">Fresh, fast & satisfying!</p>
+    <p class="muted">Osu Shell · East Legon (Lagos Ave) · East Legon Hills</p>
+    <p><a href="https://www.instagram.com/eggstacy.gh/" target="_blank" rel="noopener">Instagram @eggstacy.gh</a> · <a href="tel:0594681767">059 468 1767</a></p>
+    <p class="muted small">© <span id="year"></span> Eggstacy Ghana</p>
+  </footer>
+
+  <!-- Floating order button (mobile) -->
+  <button class="fab" id="fab" aria-label="View order">🛒 <span id="fabText">Your order</span></button>
+
+  <!-- CART DRAWER -->
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="drawer" aria-label="Your order" aria-hidden="true">
+    <div class="drawer__head">
+      <h3>Your order</h3>
+      <button class="icon-btn" id="cartClose" aria-label="Close">✕</button>
+    </div>
+    <div class="drawer__body" id="cartItems"></div>
+    <div class="drawer__foot">
+      <label class="field">Branch
+        <select id="branchSelect"></select>
+      </label>
+      <label class="field">Your name
+        <input id="custName" placeholder="e.g. Ama" autocomplete="name" />
+      </label>
+      <label class="field">Note (optional)
+        <input id="custNote" placeholder="Extra cheese, no onions…" />
+      </label>
+      <div class="total"><span>Total</span><strong id="cartTotal">GH₵ 0</strong></div>
+      <p class="muted small" id="totalNote"></p>
+      <button class="btn btn--yellow btn--block" id="sendWhatsApp">Send order on WhatsApp</button>
+      <a class="btn btn--ghost btn--block" id="callBranch" href="#">📞 Call branch instead</a>
+    </div>
+  </aside>
+
+  <!-- VIDEO MODAL -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <button class="icon-btn modal__close" id="modalClose" aria-label="Close video">✕</button>
+    <video id="modalVideo" controls playsinline></video>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
